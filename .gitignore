@@ -40,3 +40,9 @@
 *.vcxproj
 *.user
 *.filters
+
+
+
+/**/*.vs
+
+/**/*x64
