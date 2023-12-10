@@ -36,11 +36,40 @@ public:
 		postOrder(root);
 	}
 	//层次遍历 
-	void levelOrder(void (*theVisit)(binaryTreeNode<T>*))
+	void levelOrder(void (*theVisit)(binaryTreeNode<T>*) = output)
 	{
 		visit = theVisit;
+		std::cout << "LevelOrderList:\t";
 		levelOrder(root);
+		std::cout << std::endl;
 	}
+
+	//迭代遍历二叉树(默认打印输出)
+	//前序
+	void preOrderByLoop(void (*theVisit)(binaryTreeNode<T>*) = output)
+	{
+		visit = theVisit;
+		std::cout << "PreOrderList(loop):\t";
+		preOrderByLoop(root);
+		std::cout << std::endl;
+	}
+	//中序
+	void inOrderByLoop(void (*theVisit)(binaryTreeNode<T>*) = output)
+	{
+		visit = theVisit;
+		std::cout << "InOrderList(loop):\t";
+		inOrderByLoop(root);
+		std::cout << std::endl;
+	}
+	//后序
+	void postOrderByLoop(void (*theVisit)(binaryTreeNode<T>*) = output)
+	{
+		visit = theVisit;
+		std::cout << "PostOrderList(loop):\t";
+		postOrderByLoop(root);
+		std::cout << std::endl;
+	}
+
 	void erase()
 	{
 		postOrder(dispose);
@@ -73,6 +102,20 @@ public:
 		std::cout << std::endl;
 	}
 
+	//返回二叉树高度
+	int height()
+	{
+		return height(root);
+	}
+
+	//返回节点数
+	int countNodes()
+	{
+		visit = countNode;
+		postOrder(root);
+		return count;
+	}
+
 	void buildBinaryTreePreIn(std::vector<T>& preOrder, std::vector<T>& inOrder);
 	binaryTreeNode<T>* buildBinaryTreePreInHelper(
 		std::vector<T>& preOrder, const int preLeft, const int preRight,
@@ -87,20 +130,34 @@ public:
 		std::map<T, int>& inMap
 	);
 
+
 private:
 	binaryTreeNode<T>* root;
 	int treeSize;
+	static int count;
+
 	static void (*visit)(binaryTreeNode<T>*);
 	static void preOrder(binaryTreeNode<T>* node);
 	static void inOrder(binaryTreeNode<T>* node);
 	static void postOrder(binaryTreeNode<T>* node);
 	static void levelOrder(binaryTreeNode<T>* node);
 
+	//loop
+	void preOrderByLoop(binaryTreeNode<T>* node);
+	void inOrderByLoop(binaryTreeNode<T>* node);
+	void postOrderByLoop(binaryTreeNode<T>* node);
+
+	//get height
+	static int height(binaryTreeNode<T>* node);
+
+	//get count
+	static void countNode(binaryTreeNode<T>* node) { count++; }
+
 	static void dispose(binaryTreeNode<T>* node) { delete node; }
-	static void output(binaryTreeNode<T>* node) { std::cout << node->element << " ";}
+	static void output(binaryTreeNode<T>* node) { std::cout << node->element << " "; }
 
 };
-
+int linkedBinaryTree<int>::count;
 void (*linkedBinaryTree<int>::visit)(binaryTreeNode<int>*);
 
 template<typename T>
@@ -166,6 +223,87 @@ inline void linkedBinaryTree<T>::levelOrder(binaryTreeNode<T>* node)
 }
 
 template<typename T>
+inline void linkedBinaryTree<T>::preOrderByLoop(binaryTreeNode<T>* node)
+{
+
+	binaryTreeNode<T>** theStack = new binaryTreeNode<T>*[treeSize];
+	int stackTop = -1;
+	while (stackTop != -1 || node)
+	{
+		while (node)
+		{
+			visit(node);
+			theStack[++stackTop] = node;
+			node = node->leftChild;
+		}
+		node = theStack[stackTop--];
+		node = node->rightChild;
+	}
+	delete theStack;
+}
+
+template<typename T>
+inline void linkedBinaryTree<T>::inOrderByLoop(binaryTreeNode<T>* node)
+{
+	binaryTreeNode<T>** theStack = new binaryTreeNode<T>*[treeSize];
+	int stackTop = -1;
+
+	while (node || stackTop != -1)
+	{
+		while (node)
+		{
+			theStack[++stackTop] = node;
+			node = node->leftChild;
+		}
+		node = theStack[stackTop--];
+		visit(node);
+		node = node->rightChild;
+	}
+}
+
+template<typename T>
+inline void linkedBinaryTree<T>::postOrderByLoop(binaryTreeNode<T>* node)
+{
+	binaryTreeNode<T>** theStack = new binaryTreeNode<T>*[treeSize];
+	int stackTop = -1;
+	binaryTreeNode<T>* previousNode = nullptr;
+
+	while (node || stackTop != -1)
+	{
+		while (node)
+		{
+			theStack[++stackTop] = node;
+			node = node->leftChild;
+		}
+
+		node = theStack[stackTop--];
+		if (!node->rightChild || node->rightChild == previousNode)
+		{
+			visit(node);
+			previousNode = node;
+			node = nullptr;
+		}
+		else
+		{
+			theStack[++stackTop] = node;
+			node = node->rightChild;
+		}
+	}
+}
+
+template<typename T>
+inline int linkedBinaryTree<T>::height(binaryTreeNode<T>* node)
+{
+	if (!node)
+		return 0;
+
+	int leftHeight = height(node->leftChild);
+	int rightHeight = height(node->rightChild);
+
+	return std::max(leftHeight, rightHeight) + 1;
+}
+
+template<typename T>
 inline void linkedBinaryTree<T>::buildBinaryTreePreIn(std::vector<T>& preOrder, std::vector<T>& inOrder)
 {
 	if (preOrder.empty() || inOrder.empty())
@@ -184,7 +322,7 @@ inline void linkedBinaryTree<T>::buildBinaryTreePreIn(std::vector<T>& preOrder, 
 
 template<typename T>
 inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePreInHelper(
-	std::vector<T>& preOrder, const int preLeft, const int preRight, 
+	std::vector<T>& preOrder, const int preLeft, const int preRight,
 	std::vector<T>& inOrder, const int inLeft,
 	std::map<T, int>& inMap
 )
@@ -198,14 +336,14 @@ inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePreInHelper(
 	int leftSize = inMid - inLeft;
 
 	node->leftChild = buildBinaryTreePreInHelper(
-		preOrder,preLeft + 1,preLeft + leftSize,
-		inOrder,inLeft,
+		preOrder, preLeft + 1, preLeft + leftSize,
+		inOrder, inLeft,
 		inMap
 	);
 
 	node->rightChild = buildBinaryTreePreInHelper(
 		preOrder, preLeft + leftSize + 1, preRight,
-		inOrder,inMid + 1,
+		inOrder, inMid + 1,
 		inMap
 	);
 

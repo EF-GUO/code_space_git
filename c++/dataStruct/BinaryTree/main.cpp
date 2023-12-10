@@ -14,8 +14,13 @@ int main()
 	vector<int>inOrder{ 1,6,8,4,3,5,9,7,10,11,12,2 };
 	demo.buildBinaryTreePreIn(preOrder, inOrder);
 
-	demo.preOrderOutput();
-	demo.inOrderOutput();
-	demo.postOrderOutput();
+	//demo.preOrderOutput();
+	//demo.inOrderOutput();
+	//demo.postOrderOutput();
 
+	//demo.levelOrder();
+	//demo.postOrderByLoop();
+
+	//cout << demo.height() << endl;
+	cout << demo.countNodes() << endl;
 }
