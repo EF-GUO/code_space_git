@@ -9,6 +9,7 @@ struct binaryTreeNode
 	binaryTreeNode<T>* rightChild;
 
 	binaryTreeNode() = default;
+
 	binaryTreeNode(const T& theElement)
 		:element(theElement), leftChild(nullptr), rightChild(nullptr)
 	{}

@@ -82,7 +82,6 @@ public:
 
 
 	//遍历并打印输出
-
 	void preOrderOutput()
 	{
 		visit = output;
@@ -133,11 +132,9 @@ public:
 		std::map<T, int>& inMap
 	);
 
-	//后序遍历复制二叉树
-	void copyBinaryTreeInPostOrder(binaryTreeNode<T>* node);
+	bool compare(const binaryTree<T>* const theTree) const;
 
-	//前序遍历复制二叉树
-	void copyBinaryTreeInPreOrder(binaryTreeNode<T>* node);
+
 private:
 	binaryTreeNode<T>* root;
 	int treeSize;
@@ -160,8 +157,8 @@ private:
 	static void dispose(binaryTreeNode<T>* node) { delete node; }
 	static void output(binaryTreeNode<T>* node) { std::cout << node->element << " "; }
 
-
-	//new
+	//compare
+	static bool compare(const binaryTreeNode<T>* const Lhs, const binaryTreeNode<T>* const Rhs);
 };
 int linkedBinaryTree<int>::count;
 void (*linkedBinaryTree<int>::visit)(binaryTreeNode<int>*);
@@ -273,7 +270,6 @@ inline void linkedBinaryTree<T>::postOrderByLoop(binaryTreeNode<T>* node)
 	binaryTreeNode<T>** theStack = new binaryTreeNode<T>*[treeSize];
 	int stackTop = -1;
 	binaryTreeNode<T>* previousNode = nullptr;
-
 	while (node || stackTop != -1)
 	{
 		while (node)
@@ -305,7 +301,6 @@ inline int linkedBinaryTree<T>::height(binaryTreeNode<T>* node)
 
 	int leftHeight = height(node->leftChild);
 	int rightHeight = height(node->rightChild);
-
 	return std::max(leftHeight, rightHeight) + 1;
 }
 
@@ -316,7 +311,6 @@ inline void linkedBinaryTree<T>::buildBinaryTreePreIn(std::vector<T>& preOrder, 
 		return;
 	if (preOrder.size() != inOrder.size())
 		return;
-
 	root = nullptr;
 	treeSize = 0;
 	std::map<T, int> inMap;
@@ -346,7 +340,6 @@ inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePreInHelper(
 		inOrder, inLeft,
 		inMap
 	);
-
 	node->rightChild = buildBinaryTreePreInHelper(
 		preOrder, preLeft + leftSize + 1, preRight,
 		inOrder, inMid + 1,
@@ -371,7 +364,6 @@ inline void linkedBinaryTree<T>::buildBinaryTreePostIn(std::vector<T>& postOrder
 
 	for (size_t i = 0; i < postOrder.size(); i++)
 		inMap[inOrder[i]] = i;
-
 	root = buildBinaryTreePostInHelper(postOrder, 0, postOrder.size() - 1, inOrder, 0, inOrder.size() - 1, inMap);
 }
 
@@ -395,34 +387,31 @@ inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePostInHelper(std::
 		postOrder, postRight - rightSize, postRight - 1,
 		inOrder, inMid + 1, inRight, inMap
 	);
-
 	return node;
 }
 
+
 template<typename T>
-inline void linkedBinaryTree<T>::copyBinaryTreeInPostOrder(binaryTreeNode<T>* node)
+inline bool linkedBinaryTree<T>::compare(const binaryTree<T>* const theTree) const
 {
-	if (!node)
-		return;
-
-
+	if (!theTree)
+		return false;
+	if (treeSize != theTree)
+		return false;
+	return compare(root, theTree);
 }
 
 
+template<typename T>
+inline bool linkedBinaryTree<T>::compare(const binaryTreeNode<T>* const Lhs, const binaryTreeNode<T>* const Rhs)
+{
+	if (!Lhs && !Rhs)
+		return true;
+	if (!Lhs || !Rhs)
+		return false;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+	return Lhs->element == Rhs->element && compare(Lhs->leftChild, Lhs->leftChild) && compare(Rhs->rightChild, Rhs->rightChild);
+}
 
 
 
