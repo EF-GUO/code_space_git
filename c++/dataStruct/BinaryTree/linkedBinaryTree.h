@@ -17,6 +17,9 @@ public:
 	~linkedBinaryTree() { erase(); }
 	bool empty() const { return treeSize == 0; }
 	int size() const { return treeSize; }
+
+	binaryTreeNode<T>* getRoot() { return root; }
+
 	//前序遍历
 	void preOrder(void (*theVisit)(binaryTreeNode<T>*))
 	{
@@ -130,7 +133,11 @@ public:
 		std::map<T, int>& inMap
 	);
 
+	//后序遍历复制二叉树
+	void copyBinaryTreeInPostOrder(binaryTreeNode<T>* node);
 
+	//前序遍历复制二叉树
+	void copyBinaryTreeInPreOrder(binaryTreeNode<T>* node);
 private:
 	binaryTreeNode<T>* root;
 	int treeSize;
@@ -146,16 +153,15 @@ private:
 	void preOrderByLoop(binaryTreeNode<T>* node);
 	void inOrderByLoop(binaryTreeNode<T>* node);
 	void postOrderByLoop(binaryTreeNode<T>* node);
-
 	//get height
 	static int height(binaryTreeNode<T>* node);
-
 	//get count
 	static void countNode(binaryTreeNode<T>* node) { count++; }
-
 	static void dispose(binaryTreeNode<T>* node) { delete node; }
 	static void output(binaryTreeNode<T>* node) { std::cout << node->element << " "; }
 
+
+	//new
 };
 int linkedBinaryTree<int>::count;
 void (*linkedBinaryTree<int>::visit)(binaryTreeNode<int>*);
@@ -393,8 +399,14 @@ inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePostInHelper(std::
 	return node;
 }
 
+template<typename T>
+inline void linkedBinaryTree<T>::copyBinaryTreeInPostOrder(binaryTreeNode<T>* node)
+{
+	if (!node)
+		return;
 
 
+}
 
 
 
