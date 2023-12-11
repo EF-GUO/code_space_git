@@ -126,7 +126,7 @@ public:
 	void buildBinaryTreePostIn(std::vector<T>& postOrder, std::vector<T>& inOrder);
 	binaryTreeNode<T>* buildBinaryTreePostInHelper(
 		std::vector<T>& postOrder, const int postLeft, const int postRight,
-		std::vector<T>& inOrder, const int inLeft,
+		std::vector<T>& inOrder, const int inLeft, const int inRight,
 		std::map<T, int>& inMap
 	);
 
@@ -351,8 +351,47 @@ inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePreInHelper(
 }
 
 
+template<typename T>
+inline void linkedBinaryTree<T>::buildBinaryTreePostIn(std::vector<T>& postOrder, std::vector<T>& inOrder)
+{
+	if (postOrder.empty() || inOrder.empty())
+		return;
+	if (postOrder.size() != inOrder.size())
+		return;
 
+	root = nullptr;
+	treeSize = 0;
+	std::map<T, int> inMap;
 
+	for (size_t i = 0; i < postOrder.size(); i++)
+		inMap[inOrder[i]] = i;
+
+	root = buildBinaryTreePostInHelper(postOrder, 0, postOrder.size() - 1, inOrder, 0, inOrder.size() - 1, inMap);
+}
+
+template<typename T>
+inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePostInHelper(std::vector<T>& postOrder, const int postLeft, const int postRight, std::vector<T>& inOrder, const int inLeft, const int inRight, std::map<T, int>& inMap)
+{
+	if (postLeft > postRight)
+		return nullptr;
+
+	binaryTreeNode<T>* node = new binaryTreeNode<T>(postOrder[postRight]);
+	treeSize++;
+	int inMid = inMap[postOrder[postRight]];
+	int rightSize = inRight - inMid;
+
+	node->leftChild = buildBinaryTreePostInHelper(
+		postOrder, postLeft, postRight - rightSize - 1,
+		inOrder, inLeft, inMid - 1, inMap
+	);
+
+	node->rightChild = buildBinaryTreePostInHelper(
+		postOrder, postRight - rightSize, postRight - 1,
+		inOrder, inMid + 1, inRight, inMap
+	);
+
+	return node;
+}
 
 
 
