@@ -1,12 +1,12 @@
 #pragma once
-//in github
+//git
 
 #include<iostream>
 #include <queue>
 #include <map>
 #include "binaryTree.h"
 #include "binaryTreeNode.h"
-
+#include "expressionTree.h"
 
 template<typename T>
 class linkedBinaryTree :binaryTree<binaryTreeNode<T>>
@@ -348,7 +348,6 @@ inline binaryTreeNode<T>* linkedBinaryTree<T>::buildBinaryTreePreInHelper(
 
 	return node;
 }
-
 
 template<typename T>
 inline void linkedBinaryTree<T>::buildBinaryTreePostIn(std::vector<T>& postOrder, std::vector<T>& inOrder)
