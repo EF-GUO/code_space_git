@@ -13,14 +13,11 @@ int main()
 	demo.showHeap();
 	int count = 0;
 
-
 	auto z = demo.begin();
 	auto j = demo.end();
 
 	for (maxHeap<int>::Iterator i = demo.begin(); i != demo.end(); ++i)
 		count++;
-
-
 }
 
 
