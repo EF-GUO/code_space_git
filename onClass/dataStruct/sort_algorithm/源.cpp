@@ -11,11 +11,11 @@ int main()
 	using namespace std;
 
 	int SIZE = 10;
-	int* array = new int[SIZE]{ 5,1,6,8,3,4,9,7,2,10 };
-	
+	int* array = new int[SIZE] { 5, 1, 6, 8, 3, 4, 9, 7, 2, 10 };
+
 	showArray<int>(array, SIZE);
 
-	bubbleSort(array, SIZE);
+	mergeSort(array, 0, SIZE - 1);
 
 	showArray<int>(array, SIZE);
 
@@ -30,7 +30,7 @@ int main()
 //¸¨Öúº¯Êý
 
 template<typename T>
-void showArray(T* theArray,const int theSize)
+void showArray(T* theArray, const int theSize)
 {
 	for (size_t i = 0; i < theSize; i++)
 		std::cout << theArray[i] << " ";

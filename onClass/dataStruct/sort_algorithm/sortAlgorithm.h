@@ -13,7 +13,12 @@ void selectSort(T* theArray, const int theSize);
 template<typename T>
 void bubbleSort(T* theArray, const int theSize);
 
-
+//merge-sort
+template<typename T>
+void mergeSort(T* theArray, const int left, const int right);
+//merge
+template<typename T>
+void merge(T* theArray, const int left, const int mid, const int right);
 
 
 //自定义类型需要重载operator>
@@ -74,6 +79,54 @@ inline void bubbleSort(T* theArray, const int theSize)
 			}
 		}
 	}
+}
+
+template<typename T>
+inline void mergeSort(T* theArray, const int left, const int right)
+{
+	if (left < right)
+	{
+		int mid = (left + right) / 2;
+		mergeSort(theArray, left, mid);
+		mergeSort(theArray, mid + 1, right);
+		merge(theArray, left, mid, right);
+	}
+}
+
+template<typename T>
+inline void merge(T* theArray, const int left, const int mid, const int right)
+{
+	int leftSubSize = mid - left + 1;
+	int rightSubSize = right - mid;
+
+	T* leftSub = new T[leftSubSize];
+	T* rightSub = new T[rightSubSize];
+	std::copy(theArray, theArray + leftSubSize, leftSub);				//subArrayLeft: [left,mid]
+	std::copy(theArray, theArray + (right - left) + 1, rightSub);		//subArrayRight:[mid + 1,right]
+
+	int leftSubIndex = 0, rightSubIndex = 0;
+	int index = left;
+	while (leftSubIndex != leftSubSize || rightSubIndex != rightSubSize)
+	{
+		if (leftSubIndex == leftSubSize)
+		{
+			theArray[index] = rightSub[rightSubIndex++];
+			continue;
+		}
+		if (rightSubIndex == rightSubSize)
+		{
+			theArray[index] = leftSub[leftSubIndex++];
+			continue;
+		}
+
+		if (leftSub[leftSubIndex] < rightSub[rightSubIndex])
+			theArray[index] = leftSub[leftSubIndex++];
+		else
+			theArray[index] = rightSub[rightSubIndex++];
+	}
+	delete[]leftSub;
+	delete[]rightSub;
+
 }
 
 
