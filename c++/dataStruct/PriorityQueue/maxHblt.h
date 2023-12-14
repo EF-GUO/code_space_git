@@ -9,9 +9,9 @@ class maxHblt :public linkedBinaryTree<T>
 {
 public:
 	maxHblt() = default;
-	//合并
-	void meld(maxHblt<T>& theHblt);
 
+		//合并
+	void meld(maxHblt<T>& theHblt);
 private:
 	void meld(binaryTreeNode<std::pair<int, T>>*& x, binaryTreeNode < std::pair<int, T>*& y);
 
