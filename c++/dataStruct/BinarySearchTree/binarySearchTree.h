@@ -1,4 +1,5 @@
 #pragma once
+#include <iostream>
 
 #include "bSTree.h"
 #include "binaryTreeNode.h"
@@ -10,18 +11,25 @@ class binarySearchTree :public bSTree<K, E>
 public:
 	binarySearchTree()
 		:root(nullptr), treeSize(0) {}
-
 	~binarySearchTree();
-
 	bool empty() const { return treeSize == 0; };
 	int size() const { return treeSize; };
-
 	std::pair<const K, E>* find(const K& theKey) const;
 	void erase(const K& theKey);
 	void insert(const std::pair<const K, E>& thePair);
-
 	void ascend();
 
+	//练习8 添加了outputInRange(theLow,theHigh)方法
+	void outputInRange(const K& theLow, const K& theHigh);
+
+	//练习10 利用二叉搜索树对元素进行排序
+	void sortArray(K* theArray, const int theSize);
+	void sortArray(binaryTreeNode<std::pair<const K, E>>* theNode, K* theArray, int& theSize = 0);
+
+	//练习12，拆分二叉搜索树
+	binaryTreeNode<std::pair<const K, E>>* split(const K& theKey, binarySearchTree<K, E>* lessThan = nullptr, binarySearchTree<K, E>* greaterThan = nullptr);
+
+	binaryTreeNode<std::pair<const K, E>>* splitHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theKey, binaryTreeNode<std::pair<const K, E>>* lessThanRightNode, binaryTreeNode<std::pair<const K, E>>* moreThanLeftNode);
 
 private:
 	binaryTreeNode<std::pair<const K, E>>* root;
@@ -31,14 +39,14 @@ private:
 		std::cout << "Key: " << theNode->element.first << "\t" << "Val: " << theNode->element.second << std::endl;
 	}
 	static void (*visit)(binaryTreeNode<std::pair<const K, E>>* theNode);
-
 	static void delHelper(binaryTreeNode<std::pair<const K, E>>* theNode)
 	{
 		delete theNode;
 	}
-
 	static void inOrder(binaryTreeNode<std::pair<const K, E>>* theNode);
 	static void postOrder(binaryTreeNode<std::pair<const K, E>>* theNode);
+
+	static void outputInRangeHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theLow, const K& theHigh);
 };
 
 void (*binarySearchTree<int, int>::visit)(binaryTreeNode<std::pair<const int, int>>* theNode);
@@ -207,20 +215,215 @@ inline void binarySearchTree<K, E>::insert(const std::pair<const K, E>& thePair)
 	++treeSize;
 }
 
+template<typename K, typename E>
+inline void binarySearchTree<K, E>::outputInRange(const K& theLow, const K& theHigh)
+{
+	if (root)
+		outputInRangeHelper(root, theLow, theHigh);
+}
+
+template<typename K, typename E>
+inline void binarySearchTree<K, E>::outputInRangeHelper(binaryTreeNode<std::pair<const K, E>>* theNode, const K& theLow, const K& theHigh)
+{
+	if (theNode->leftChild)
+		outputInRangeHelper(theNode->leftChild, theLow, theHigh);
+	if (theNode->element.first >= theLow && theNode->element.first <= theHigh)
+		output(theNode);
+	if (theNode->rightChild)
+		outputInRangeHelper(theNode->rightChild, theLow, theHigh);
+}
+
+
+inline void binarySearchTree<int, int>::sortArray(int* theArray, const int theSize)
+{
+	for (int i = 0; i < theSize; i++)
+		insert(std::make_pair(theArray[i], i));
+
+	int index = 0;
+	sortArray(root, theArray, index);
+}
+
+template<typename K, typename E>
+inline void binarySearchTree<K, E>::sortArray(binaryTreeNode<std::pair<const K, E>>* theNode, K* theArray, int& theSize)
+{
+	if (theNode)
+	{
+		sortArray(theNode->leftChild, theArray, theSize);
+		theArray[theSize++] = theNode->element.first;
+		sortArray(theNode->rightChild, theArray, theSize);
+	}
+}
+
+template<typename K, typename E>
+inline binaryTreeNode<std::pair<const K, E>>* binarySearchTree<K, E>::split(const K& theKey, binarySearchTree<K, E>* lessThan, binarySearchTree<K, E>* greaterThan)
+{
+
+	binaryTreeNode<std::pair<const K, E>>* returnNode = nullptr;
+
+	if (theKey == root->element.first)
+	{
+		lessThan->root = root->leftChild;
+		greaterThan->root = root->rightChild;
+		returnNode = root;
+		root = nullptr;
+		treeSize = 0;
+		return returnNode;
+	}
+	binaryTreeNode<std::pair<const K, E>>
+		* currentNode = root,
+		* previousCurrentNode = nullptr,
+		* lessThanRightNode = nullptr,
+		* moreThanLeftNode = nullptr;
 
 
 
+	if (theKey > currentNode->element.first)
+	{
+		while (currentNode && theKey > currentNode->element.first)
+		{
+			previousCurrentNode = currentNode;
+			currentNode = currentNode->rightChild;
+		}
+
+		if (!currentNode)
+		{
+			lessThan->root = root;
+			greaterThan->root = nullptr;
+			root = nullptr;
+			return nullptr;
+		}
+
+		if (currentNode->element.first == theKey)
+		{
+			returnNode = currentNode;
+			lessThan->root = root;
+			greaterThan->root = nullptr;
+			root = nullptr;
+			return returnNode;
+		}
+
+		binaryTreeNode<std::pair<const K, E>>* nextNode = currentNode->leftChild;
+		currentNode->leftChild = previousCurrentNode->rightChild = nullptr;
+
+		lessThan->root = root;
+		greaterThan->root = currentNode;
+
+		lessThanRightNode = previousCurrentNode;
+		moreThanLeftNode = currentNode;
+
+		root = nextNode;
+
+	}
+	else if (theKey < currentNode->element.first)
+	{
+		while (currentNode && theKey < currentNode->element.first)
+		{
+			previousCurrentNode = currentNode;
+			currentNode = currentNode->leftChild;
+		}
+		if (!currentNode)
+		{
+			greaterThan->root = root;
+			lessThan->root = nullptr;
+			root = nullptr;
+			return nullptr;
+		}
+		if (currentNode->element.first == theKey)
+		{
+			returnNode = currentNode;
+			lessThan->root = root;
+			greaterThan->root = nullptr;
+			root = nullptr;
+			return returnNode;
+		}
+		binaryTreeNode<std::pair<const K, E>>* nextNode = currentNode->rightChild;
+		currentNode->rightChild = previousCurrentNode->leftChild = nullptr;
+
+		lessThan->root = currentNode;;
+		greaterThan->root = root;
+
+		lessThanRightNode = currentNode;
+		moreThanLeftNode = previousCurrentNode;
+		root = nextNode;
+	}
+
+	binaryTreeNode<std::pair<const K, E>>* temp = splitHelper(root, theKey, lessThanRightNode, moreThanLeftNode);
+	root = nullptr;
+	return temp;
+}
+
+template<typename K, typename E>
+binaryTreeNode<std::pair<const K,E>>* binarySearchTree<K, E>::splitHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theKey, binaryTreeNode<std::pair<const K, E>>* lessThanRightNode, binaryTreeNode<std::pair<const K, E>>* moreThanLeftNode)
+{
+	if (!node)
+		return nullptr;
 
 
 
+	binaryTreeNode<std::pair<const K, E>>
+		* currentNode = node,
+		* previousCurrentNode = nullptr;
+	if (theKey == currentNode->element.first)
+	{
+		moreThanLeftNode->leftChild = currentNode->rightChild;
+		lessThanRightNode->rightChild = currentNode->leftChild;
+		return currentNode;
+	}
+	//找到当前最外层的分界点
+
+	if (theKey > currentNode->element.first)
+	{
+		while (currentNode && theKey > currentNode->element.first)
+		{
+			previousCurrentNode = currentNode;
+			currentNode = currentNode->rightChild;
+		}
+		if (!currentNode)
+		{
+			lessThanRightNode->rightChild = node;
+			return nullptr;
+		}
+		binaryTreeNode<std::pair<const K, E>>* nextNode = currentNode->leftChild;
+		currentNode->leftChild = previousCurrentNode->rightChild = nullptr;
 
 
+		lessThanRightNode->rightChild = node;
+		moreThanLeftNode->leftChild = currentNode;
 
+		lessThanRightNode = previousCurrentNode;
+		moreThanLeftNode = currentNode;
 
+		node = nextNode;
+	}
+	else if (theKey < currentNode->element.first)
+	{
+		while (currentNode && theKey < currentNode->element.first)
+		{
+			previousCurrentNode = currentNode;
+			currentNode = currentNode->leftChild;
+		}
 
+		if (!currentNode)
+		{
+			moreThanLeftNode->leftChild = node;
+			return nullptr;
+		}
 
+		binaryTreeNode<std::pair<const K, E>>* nextNode = currentNode->rightChild;
+		currentNode->rightChild = previousCurrentNode->leftChild = nullptr;
 
+		lessThanRightNode->rightChild = currentNode;
+		moreThanLeftNode->leftChild = node;
 
+		lessThanRightNode = currentNode;
+		moreThanLeftNode = previousCurrentNode;
+
+		node = nextNode;
+
+	}
+	return splitHelper(node, theKey, lessThanRightNode, moreThanLeftNode);
+
+}
 
 
 
