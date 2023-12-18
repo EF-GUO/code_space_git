@@ -55,15 +55,22 @@ int main()
 
 
 
-	demo1.split(39, &demo2, &demo3);
-	demo2.ascend();
-	cout << endl << endl << endl << endl;
+	//demo1.split(60, &demo2, &demo3);
+	//demo2.ascend();
+	//cout << endl << endl << endl << endl;
 
-	demo3.ascend();
-
-
+	//demo3.ascend();
 
 	//demo2.~binarySearchTree<int, int>();
+	demo1.ascend();
+
+	cout << endl << endl << endl << endl;
+
+	demo1.eraseMax();
+
+	demo1.eraseMax();
+
+	demo1.ascend();
 
 }
 

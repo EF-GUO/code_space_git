@@ -31,6 +31,51 @@ public:
 
 	binaryTreeNode<std::pair<const K, E>>* splitHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theKey, binaryTreeNode<std::pair<const K, E>>* lessThanRightNode, binaryTreeNode<std::pair<const K, E>>* moreThanLeftNode);
 
+	//练习14,设计一个迭代器，按照关键字的升序查看元素
+	class Iterator
+	{
+	public:
+		Iterator(binaryTreeNode<std::pair<const K, E>>* theNode)
+			:node(theNode) {}
+		E& operator*()
+		{
+			return node->element.second;
+		}
+
+		//前置递增
+		Iterator& operator++()
+		{
+
+		}
+
+		//后置递增
+		Iterator operator++(int)
+		{
+
+		}
+
+	private:
+		binaryTreeNode<std::pair<const K, E>>* node;
+	};
+
+	Iterator begin()
+	{
+		binaryTreeNode<std::pair<const K, E>>* currentNode = root;
+		while (currentNode->leftChild)
+			currentNode = currentNode->leftChild;
+		return Iterator(currentNode);
+	}
+
+	Iterator end()
+	{
+		binaryTreeNode<std::pair<const K, E>>* currentNode = root;
+		while (currentNode->rightChild)
+			currentNode = currentNode->rightChild;
+		return Iterator(currentNode);
+	}
+
+	//练习15,从二叉搜索树中删除最大的元素
+	void eraseMax();
 private:
 	binaryTreeNode<std::pair<const K, E>>* root;
 	int treeSize;
@@ -275,8 +320,6 @@ inline binaryTreeNode<std::pair<const K, E>>* binarySearchTree<K, E>::split(cons
 		* lessThanRightNode = nullptr,
 		* moreThanLeftNode = nullptr;
 
-
-
 	if (theKey > currentNode->element.first)
 	{
 		while (currentNode && theKey > currentNode->element.first)
@@ -284,7 +327,6 @@ inline binaryTreeNode<std::pair<const K, E>>* binarySearchTree<K, E>::split(cons
 			previousCurrentNode = currentNode;
 			currentNode = currentNode->rightChild;
 		}
-
 		if (!currentNode)
 		{
 			lessThan->root = root;
@@ -353,12 +395,10 @@ inline binaryTreeNode<std::pair<const K, E>>* binarySearchTree<K, E>::split(cons
 }
 
 template<typename K, typename E>
-binaryTreeNode<std::pair<const K,E>>* binarySearchTree<K, E>::splitHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theKey, binaryTreeNode<std::pair<const K, E>>* lessThanRightNode, binaryTreeNode<std::pair<const K, E>>* moreThanLeftNode)
+binaryTreeNode<std::pair<const K, E>>* binarySearchTree<K, E>::splitHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theKey, binaryTreeNode<std::pair<const K, E>>* lessThanRightNode, binaryTreeNode<std::pair<const K, E>>* moreThanLeftNode)
 {
 	if (!node)
 		return nullptr;
-
-
 
 	binaryTreeNode<std::pair<const K, E>>
 		* currentNode = node,
@@ -385,7 +425,6 @@ binaryTreeNode<std::pair<const K,E>>* binarySearchTree<K, E>::splitHelper(binary
 		}
 		binaryTreeNode<std::pair<const K, E>>* nextNode = currentNode->leftChild;
 		currentNode->leftChild = previousCurrentNode->rightChild = nullptr;
-
 
 		lessThanRightNode->rightChild = node;
 		moreThanLeftNode->leftChild = currentNode;
@@ -426,6 +465,26 @@ binaryTreeNode<std::pair<const K,E>>* binarySearchTree<K, E>::splitHelper(binary
 }
 
 
+template<typename K, typename E>
+void binarySearchTree<K, E>::eraseMax()
+{
+	binaryTreeNode<std::pair<const K, E>>
+		* currentNode = root,
+		* previousCurrentNode = nullptr;
 
+	while (currentNode->rightChild)
+	{
+		previousCurrentNode = currentNode;
+		currentNode = currentNode->rightChild;
+	}
+
+	if (currentNode->leftChild)
+		previousCurrentNode->rightChild = currentNode->leftChild;
+	else
+		previousCurrentNode->rightChild = nullptr;
+
+	delete currentNode;
+	treeSize--;
+}
 
 
