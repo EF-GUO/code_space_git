@@ -307,7 +307,7 @@ inline void indexedBinarySearchTree<K, E>::deleteByIndex(const int theIndex)
 		//创建新的替换节点
 		indexedBinarySearchTreeNode<std::pair<const K, E>>
 			* insteadNode = new indexedBinarySearchTreeNode<std::pair<const K, E>>
-			(leftMaxNode->element, deleteNode->leftChild, deleteNode->rightChild);
+			(leftMaxNode->element, deleteNode->leftChild, deleteNode->rightChild, deleteNode->leftSize - 1);
 
 		if (!previousDeleteNode)
 			root = insteadNode;
@@ -348,9 +348,15 @@ inline void indexedBinarySearchTree<K, E>::deleteByIndex(const int theIndex)
 
 	delete deleteNode;
 	--treeSize;
-
+	
+	while (!nodeStack.empty())
+	{
+		nodeStack.top()->leftSize--;
+		nodeStack.pop();
+	}
 
 }
+
 
 template<typename K, typename E>
 inline void indexedBinarySearchTree<K, E>::output(indexedBinarySearchTreeNode<std::pair<const K, E>>* theNode)
