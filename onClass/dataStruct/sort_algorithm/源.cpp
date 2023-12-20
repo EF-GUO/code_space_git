@@ -9,6 +9,7 @@ void showArray(T* theArray, const int theSize);
 int main()
 {
 	using namespace std;
+	using namespace sortAlgorithm;
 
 	int SIZE = 10;
 	int* array = new int[SIZE] { 5, 1, 6, 8, 3, 4, 9, 7, 2, 10 };
