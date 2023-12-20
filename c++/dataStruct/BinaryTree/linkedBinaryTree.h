@@ -13,7 +13,8 @@ class linkedBinaryTree :binaryTree<binaryTreeNode<T>>
 {
 
 public:
-	linkedBinaryTree() : root(nullptr), treeSize(0) {}
+	linkedBinaryTree() 
+		: root(nullptr), treeSize(0) {}
 	~linkedBinaryTree() { erase(); }
 	bool empty() const { return treeSize == 0; }
 	int size() const { return treeSize; }

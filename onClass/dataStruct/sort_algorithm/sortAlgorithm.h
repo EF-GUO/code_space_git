@@ -25,7 +25,7 @@ namespace sortAlgorithm
 	//ºÏ²¢²Ù×÷
 
 	template<typename T>
-	void shellSort();
+	void shellSort(T* theArray, const int n);
 
 	template<typename T>
 	inline void insertSort(T* theArray, const int theSize)
@@ -136,6 +136,21 @@ namespace sortAlgorithm
 	}
 
 
+	template<typename T>
+	void shellSort(T* theArray, const int n)
+	{
+		for (int gap = n / 2; gap > 0; gap /= 2)
+		{
+			for (int i = gap; i < n; ++i)
+			{
+				T temp = theArray[i];
+				int j;
+				for (j = i; j >= gap && theArray[j - gap] > temp; j -= gap)
+					theArray[j] = theArray[j - gap];
+				theArray[j] = temp;
+			}
+		}
+	}
 }
 
 

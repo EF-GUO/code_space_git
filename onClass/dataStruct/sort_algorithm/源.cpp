@@ -16,7 +16,9 @@ int main()
 
 	showArray<int>(array, SIZE);
 
-	mergeSort(array, 0, SIZE - 1);
+	//mergeSort(array, 0, SIZE - 1);
+
+	shellSort(array, SIZE);
 
 	showArray<int>(array, SIZE);
 
