@@ -81,7 +81,6 @@ public:
 		treeSize = 0;
 	}
 
-
 	//遍历并打印输出
 	void preOrderOutput()
 	{
