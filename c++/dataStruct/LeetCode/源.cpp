@@ -1,67 +1,68 @@
 #include <iostream>
-#include <vector>
-#include <queue>
-#include <stack>
+
+
 
 using namespace std;
 
-
-struct TreeNode {
+struct ListNode {
 	int val;
-	TreeNode* left;
-	TreeNode* right;
-	TreeNode() : val(0), left(nullptr), right(nullptr) {}
-	TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
-	TreeNode(int x, TreeNode* left, TreeNode* right) : val(x), left(left), right(right) {}
+	ListNode* next;
+	ListNode() : val(0), next(nullptr) {}
+	ListNode(int x) : val(x), next(nullptr) {}
+	ListNode(int x, ListNode* next) : val(x), next(next) {}
 };
+ListNode* rotateRight(ListNode* head, int k);
 
-
-
-void flatten(TreeNode* root) {
-	if (!root)
-		return;
-
-	std::stack<TreeNode*> theStack;
-	std::queue<TreeNode*> theQueue;
-	TreeNode* result = nullptr;
-
-	while (root || !theStack.empty())
-	{
-		while (root)
-		{
-			theQueue.push(root);
-			theStack.push(root);
-			root = root->left;
-		}
-
-		root = theStack.top();
-		theStack.pop();
-		root = root->right;
-	}
-
-	root = theQueue.front();
-	TreeNode* currentNode = root;
-	theQueue.pop();
-	while (!theQueue.empty())
-	{
-		currentNode->right = theQueue.front();
-		theQueue.pop();
-		currentNode = currentNode->right;
-	}
-
-}
-
+void outPut(ListNode* node);
 
 
 int main()
 {
-	TreeNode* root = new TreeNode(1);
-	root->left = new TreeNode(2);
-	root->left->left = new TreeNode(3);
-	root->left->right = new TreeNode(4);
-	root->right = new TreeNode(5);
-	root->right->right = new TreeNode(6);
-	flatten(root);
+	ListNode* first = new ListNode(1);
+	ListNode* currentNode = first;
+	currentNode->next = new ListNode(2);	currentNode = currentNode->next;
+	currentNode->next = new ListNode(3);	currentNode = currentNode->next;
+	currentNode->next = new ListNode(4);	currentNode = currentNode->next;
+	currentNode->next = new ListNode(5);	currentNode = currentNode->next;
+    outPut(first);
+    cout << endl << endl;
+    first = rotateRight(first, 2);
+    outPut(first);
+
 
 
 }
+
+
+
+
+
+ListNode* rotateRight(ListNode* head, int k) {
+    //前链表的头
+    ListNode* theHead = head;
+    int count = 1;
+    while (head->next && count != k)
+    {
+        count++;
+        head = head->next;
+    }
+    ListNode* nextNode = head->next,*returnNode = head->next;
+    head->next = nullptr;
+    if (count != k)
+        return theHead;
+
+    while (nextNode->next)
+        nextNode = nextNode->next;
+    nextNode->next = theHead;
+    return returnNode;
+}
+
+void outPut(ListNode* node)
+{
+    while (node)
+    {
+        cout << node->val << " ";
+        node = node->next;
+    }
+}
+
