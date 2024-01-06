@@ -8,6 +8,23 @@
 template<typename K, typename E>
 class binarySearchTree :public bSTree<K, E>
 {
+private:
+	binaryTreeNode<std::pair<const K, E>>* root;
+	int treeSize;
+	static void output(binaryTreeNode<std::pair<const K, E>>* theNode)
+	{
+		std::cout << "Key: " << theNode->element.first << "\t" << "Val: " << theNode->element.second << std::endl;
+	}
+	static void (*visit)(binaryTreeNode<std::pair<const K, E>>* theNode);
+	static void delHelper(binaryTreeNode<std::pair<const K, E>>* theNode)
+	{
+		delete theNode;
+	}
+	static void inOrder(binaryTreeNode<std::pair<const K, E>>* theNode);
+	static void postOrder(binaryTreeNode<std::pair<const K, E>>* theNode);
+
+	static void outputInRangeHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theLow, const K& theHigh);
+
 public:
 	binarySearchTree()
 		:root(nullptr), treeSize(0) {}
@@ -76,22 +93,6 @@ public:
 
 	//练习15,从二叉搜索树中删除最大的元素
 	void eraseMax();
-private:
-	binaryTreeNode<std::pair<const K, E>>* root;
-	int treeSize;
-	static void output(binaryTreeNode<std::pair<const K, E>>* theNode)
-	{
-		std::cout << "Key: " << theNode->element.first << "\t" << "Val: " << theNode->element.second << std::endl;
-	}
-	static void (*visit)(binaryTreeNode<std::pair<const K, E>>* theNode);
-	static void delHelper(binaryTreeNode<std::pair<const K, E>>* theNode)
-	{
-		delete theNode;
-	}
-	static void inOrder(binaryTreeNode<std::pair<const K, E>>* theNode);
-	static void postOrder(binaryTreeNode<std::pair<const K, E>>* theNode);
-
-	static void outputInRangeHelper(binaryTreeNode<std::pair<const K, E>>* node, const K& theLow, const K& theHigh);
 };
 
 void (*binarySearchTree<int, int>::visit)(binaryTreeNode<std::pair<const int, int>>* theNode);

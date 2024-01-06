@@ -56,8 +56,7 @@ template<typename T>
 struct avlNode
 {
 	T element;
-	int bf;		//平衡因子
-	
+	int bf;			//平衡因子
 	avlNode<T>
 		* leftChild,
 		* rightChild;

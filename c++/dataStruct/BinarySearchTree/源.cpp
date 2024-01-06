@@ -46,91 +46,54 @@
 //
 //
 
+#include <iostream>
+#include "avlTree.h"
 
 
 
-
-template<class E, class K>
-AVLtree<E, K>& AVLtree<E, K>::Insert(const E& e)
+int main()
 {
-	AVLNode<E, K>* p = root,
-		* pp = 0,
-		* A = 0,
-		* PA;
+	using namespace std;
+	using avlTree::avlTree;
 
-	while (p) 
-	{
-		if (p->bf) 
-		{
-			A = p;
-			PA = pp;
-		}
-		pp = p;
+	avlTree<int, int>* demo = new avlTree<int, int>;
 
-		if (e < p->data) 
-			p = p->LeftChild;
-		else if (e > p->data)
-			p = p->RightChild;
-		else 
-			throw BadInput();
-	}
+	for (size_t i = 1; i <= 15; i++)
+		demo->insert(make_pair(i, 0));
+	
 
-	AVLNode<E, K>* r = new AVLNode<E, K>(e);
-	if (root) 
-	{
-		if (e < pp->data) 
-			pp->LeftChild = r;
-		else 
-			pp->RightChild = r;
-	}
-	else 
-	{
-		root = r;
-		return *this;
-	}
+	demo->ascend();
 
+	cout << endl << endl << endl;
 
-	if (A)
-		if (A->bf < 0)
-			if (e < A->data) 
-			{
-				A->bf = 0;
-				FixBF(A->LeftChild, r, e);
-			}
-			else 
-			{
-				AVLNode<E, K>* B = A->RightChild;
-				if (e > B->data) 
-				{
-					FixBF(B->RightChild, r, e);
-					RRrotate(PA, A, B);
-				}
-				else 
-				{
-					FixBF(B->LeftChild, r, e);
-					RLrotate(PA, A, B);
-				}
-			}
-		else
-			if (e > A->data) 
-			{
-				A->bf = 0;
-				FixBF(A->RightChild, r, e);
-			}
-			else {
-
-				AVLNode<E, K>* B = A->LeftChild;
-				if (e < B->data) {
-					FixBF(B->LeftChild, r, e);
-					LLrotate(PA, A, B);
-				}
-				else {
-					FixBF(B->RightChild, r, e);
-					LRrotate(PA, A, B);
-				}
-			}
-	else
-		FixBF(root, r, e);
-
-	return *this;
+	demo->levelOrder();
+	delete demo;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

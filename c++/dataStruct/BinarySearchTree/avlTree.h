@@ -1,57 +1,58 @@
 #pragma once
-
-#include <stack>
-#include "indexedBSTree.h"
+#include <iostream>
+#include <queue>
 #include "binaryTreeNode.h"
+#include "binarySearchTree.h"
+
 
 namespace avlTree
 {
-
-	using std::stack;
+	using std::pair;
 
 	template<typename K, typename E>
-	class avlTree :public indexedBSTree<K, E>
+	class avlTree
 	{
 		using node = avlNode<std::pair<const K, E>>;
 	public:
 		avlTree();
 		~avlTree();
 
-		//ADT methods
-		bool empty() const;
-		int size() const;
-		std::pair<const K, E>* find(const K& theKey) const;
-		void erase(const K& theKey);
+		//insert
 		void insert(const std::pair<const K, E>& thePair);
+
+		//asc output
 		void ascend();
-		std::pair<const K, E>* get(const int theIndex) const;
-		void deleteByIndex(const int theIndex);
+		void levelOrder(void (*theVisit)(node* theNode) = output)
+		{
+			visit = theVisit;
+			levelOrder(root);
+		}
 
 	private:
 		node
 			* root;
-		int
-			treeSize;
-
-		static void (*visit)(node* theNode);
-
-		//static private methods
+		int treeSize;
+		//output node method
 		static void output(node* theNode);
-		static void inOrder(node* theNode);
-		static void postOrder(node* theNode);
-		static void deleteNode(node* theNode);
+		static void (*visit)(node* theNode);
+		static void destructorNode(node* theNode) { delete theNode; }
 
+		//update the balance factor in [begin,end)
 		static void updateBF(node* begin, node* end, const K& theKey);
 
 		//rotate methods
-		static void LLrotate(node* PA, node* A, node* B);//LL型旋转（右旋）
-		static void RRrotate(node* PA, node* A, node* B);//RR型旋转（左旋）
-		static void LRrotate(node* PA, node* A, node* B);//LR型旋转(先右旋再左旋)
-		//static node* RLrotate();
+		void LLrotate(node* PA, node* A, node* B);
+		void RRrotate(node* PA, node* A, node* B);
+		void LRrotate(node* PA, node* A, node* B);
+		void RLrotate(node* PA, node* A, node* B);
 
+		//Traversal methods
+		static void preOrder(node* theNode);
+		static void inOrder(node* theNode);
+		static void postOrder(node* theNode);
+		static void levelOrder(node* theNode);
 	};
 	void (*avlTree<int, int>::visit)(avlTree::node* theNode);
-
 
 	template<typename K, typename E>
 	inline avlTree<K, E>::avlTree()
@@ -60,32 +61,144 @@ namespace avlTree
 	template<typename K, typename E>
 	inline avlTree<K, E>::~avlTree()
 	{
-		visit = deleteNode;
+		visit = destructorNode;
 		postOrder(root);
 	}
 
 	template<typename K, typename E>
-	inline bool avlTree<K, E>::empty() const
+	inline void avlTree<K, E>::LLrotate(node* PA, node* A, node* B)
 	{
-		return treeSize == 0;
+		A->leftChild = B->rightChild;
+		B->rightChild = A;
+
+		if (!PA)
+			root = B;
+		else
+		{
+			if (PA->leftChild == A)
+				PA->leftChild = B;
+			else
+				PA->rightChild = B;
+		}
+		A->bf = B->bf = 0;
 	}
 
 	template<typename K, typename E>
-	inline int avlTree<K, E>::size() const
+	inline void avlTree<K, E>::RRrotate(node* PA, node* A, node* B)
 	{
-		return treeSize;
+		// RR型
+		// A的右子节点为B的左子节点
+		A->rightChild = B->leftChild;
+		// B的左子节点为A
+		B->leftChild = A;
+
+		// 如果PA为空===>B就为新的root节点
+		if (!PA)
+			root = B;
+		// 否则,更改PA指向A的指针域为B
+		else
+		{
+			if (PA->leftChild == A)
+				PA->leftChild = B;
+			else
+				PA->rightChild = B;
+		}
+		//更改平衡因子
+		A->bf = B->bf = 0;
 	}
 
 	template<typename K, typename E>
-	inline std::pair<const K, E>* avlTree<K, E>::find(const K& theKey) const
+	inline void avlTree<K, E>::LRrotate(node* PA, node* A, node* B)
 	{
-		return nullptr;
+		node* C = B->rightChild;
+		B->rightChild = C->leftChild;
+		A->leftChild = C->rightChild;
+		C->leftChild = B;
+		C->rightChild = A;
+
+		if (!PA)
+			root = C;
+		else
+		{
+			if (PA->leftChild == A)
+				PA->leftChild = C;
+			else
+				PA->rightChild = C;
+		}
+		//修改节点的平衡因子
+		int b = C->bf;
+
+		if (b == 1)
+		{
+			B->bf = 0;
+			A->bf = -1;
+		}
+		else if (b)	//b==-1
+		{
+			B->bf = 1;
+			A->bf = 0;
+		}
+		else //b == 0
+			A->bf = B->bf = 0;
+		C->bf = 0;
 	}
 
 	template<typename K, typename E>
-	inline void avlTree<K, E>::erase(const K& theKey)
+	inline void avlTree<K, E>::RLrotate(node* PA, node* A, node* B)
 	{
+		node* C = B->leftChild;
 
+		A->rightChild = C->leftChild;
+		B->leftChild = C->rightChild;
+
+		C->leftChild = A;
+		C->rightChild = B;
+
+
+		//更改PA
+		if (PA)
+		{
+			if (A == PA->leftChild)
+				PA->leftChild = C;
+			else
+				PA->rightChild = C;
+		}
+		else
+			root = C;
+
+		//修改平衡因子
+		int b = C->bf;
+		if (b == 1)
+		{
+			A->bf = 0;
+			B->bf = -1;
+		}
+		else if (b)// b == -1
+		{
+			A->bf = 1;
+			B->bf = 0;
+		}
+		else// b == 0
+			A->bf = B->bf = 0;
+		C->bf = 0;
+	}
+
+	template<typename K, typename E>
+	inline void avlTree<K, E>::updateBF(node* begin, node* end, const K& theKey)
+	{
+		while (begin != end)
+		{
+			if (theKey < begin->element.first)
+			{
+				begin->bf = 1;
+				begin = begin->leftChild;
+			}
+			else
+			{
+				begin->bf = -1;
+				begin = begin->rightChild;
+			}
+		}
 	}
 
 	template<typename K, typename E>
@@ -93,110 +206,109 @@ namespace avlTree
 	{
 		node
 			* currentNode = root,
-			* previousCurrentNode = nullptr,
-			* A = nullptr，
-			* previousA;
+			* previousNode = nullptr,
+			* A = nullptr,
+			* PA = nullptr;
 
 		while (currentNode)
 		{
-			//存在相同关键字的节点,修改值并返回
-			if (currentNode->element.first != thePair.first)
+			//如果存在相同的节点，修改节点的值并结束
+			if (currentNode->element.first == thePair.first)
 			{
 				currentNode->element.second = thePair.second;
 				return;
 			}
-
-			if (currentNode->bf == 1 || currentNode->bf == -1)
-				flagNode = currentNode;
-
-			previousCurrentNode = currentNode;
+			//确定节点A以及A的父节点====》A: 插入路径中最后一个不为0的节点
+			if (currentNode->bf)
+			{
+				PA = previousNode;
+				A = currentNode;
+			}
+			//向下遍历
+			previousNode = currentNode;
 			if (thePair.first < currentNode->element.first)
 				currentNode = currentNode->leftChild;
 			else
 				currentNode = currentNode->rightChild;
 		}
-
-		node* newNode = node(thePair);
-
+		node
+			* newNode = new node(thePair);
 		if (!root)
+		{
 			root = newNode;
+			return;
+		}
 		else
 		{
-			if (thePair.first < previousCurrentNode->element.first)
-				previousCurrentNode->leftChild = newNode;
+			if (thePair.first < previousNode->element.first)
+				previousNode->leftChild = newNode;
 			else
-				previousCurrentNode->rightChild = newNode;
+				previousNode->rightChild = newNode;
 		}
-
-
-		if (A)//如果路径中存在平衡因子不等于0的节点
+		//如果路径中存在平衡因子不等于0的节点===》A存在
+		if (A)
 		{
-			if (A->bf < 0)// A->bf == -1，节点A的左子树的高度低于其右子树的高度
+			if (A->bf > 0) // A == 1
 			{
-				//如果是在A节点的左子树插入新节点，左子树高度+1，A->bf = 0
-				//此时以A节点为根的子树高度不变，不需要修改[root,A)的节点的平衡因子
-				if (thePair.first < A->element.first)
+				if (thePair.first > A->element.first)
 				{
-					//A->bf == 0
-					//修改路径(A,newNode)中节点的平衡因子
-					//return;
+					A->bf = 0;
+					updateBF(A->rightChild, newNode, thePair.first);
 				}
-				//在A的右子树插入新节点
 				else
 				{
-
+					node
+						* B = A->leftChild;
+					if (thePair.first < B->element.first) // LL型
+					{
+						updateBF(B->leftChild, newNode, thePair.first);
+						LLrotate(PA, A, B);
+					}
+					else // LR型
+					{
+						updateBF(B->rightChild, newNode, thePair.first);
+						LRrotate(PA, A, B);
+					}
 				}
 			}
-			else//A->bf == 1,节点A的左子树的高度高于其右子树的高度
+			else //A == -1
 			{
-				//如果是在A节点的右子树插入新节点，右子树高度+1，A->bf = 0
-				//此时以A节点为根的子树高度不变，不需要修改[root,A)的节点的平衡因子
 				if (thePair.first < A->element.first)
 				{
-					//A->bf == 0
-					//修改路径(A,newNode)中节点的平衡因子
-					//return;
+					A->bf = 0;
+					updateBF(A->leftChild, newNode, thePair.first);
 				}
-				//在A的左子树插入新的节点
 				else
 				{
-
+					node
+						* B = A->rightChild;
+					if (thePair.first > B->element.first)// RR 型
+					{
+						updateBF(B->rightChild, newNode, thePair.first);
+						RRrotate(PA, A, B);
+					}
+					else// RL 型
+					{
+						updateBF(B->leftChild, newNode, thePair.first);
+						RLrotate(PA, A, B);
+					}
 				}
 			}
 		}
-		else//节点A不存在,修改路径上所有节点的平衡因子
+		//A不存在，更新路径[root,newNode)上所有节点的平衡因子
+		else
+			updateBF(root, newNode, thePair.first);
+	}
+
+	template<typename K, typename E>
+	inline void avlTree<K, E>::preOrder(node* theNode)
+	{
+		if (theNode)
 		{
-
+			visit(theNode);
+			preOrder(theNode->leftChild);
+			preOrder(theNode->rightChild);
 		}
-
-
-	}
-
-	template<typename K, typename E>
-	inline void avlTree<K, E>::ascend()
-	{
-		visit = output;
-		inOrder(root);
-	}
-
-	template<typename K, typename E>
-	inline std::pair<const K, E>* avlTree<K, E>::get(const int theIndex) const
-	{
-		return nullptr;
-	}
-
-	template<typename K, typename E>
-	inline void avlTree<K, E>::deleteByIndex(const int theIndex)
-	{
-	}
-
-	template<typename K, typename E>
-	inline void avlTree<K, E>::output(node* theNode)
-	{
-		std::cout
-			<< "KEY: " << theNode->element.first << "\t"
-			<< "VALUE: " << theNode->element.second
-			<< std::endl;
 	}
 
 	template<typename K, typename E>
@@ -222,75 +334,62 @@ namespace avlTree
 	}
 
 	template<typename K, typename E>
-	inline void avlTree<K, E>::deleteNode(node* theNode)
+	inline void avlTree<K, E>::output(node* theNode)
 	{
-		delete theNode;
+		std::cout
+			<< "KEY:\t" << theNode->element.first << "\t"
+			<< "VALUE:\t" << theNode->element.second << std::endl;
 	}
 
 	template<typename K, typename E>
-	inline void avlTree<K, E>::updateBF(node* begin, node* end, const K& theKey)
+	inline void avlTree<K, E>::ascend()
 	{
-		//更新路径平衡因子
-		//更新从begin节点到end节点的路径====>[begin,end)
-		while (begin != end)
-			if (theKey < begin->element.first)
+		visit = output;
+		inOrder(root);
+	}
+
+	template<typename K, typename E>
+	inline void avlTree<K, E>::levelOrder(node* theNode)
+	{
+		std::queue<node*> theQueue;
+
+
+		while (theNode)
+		{
+			visit(theNode);
+			if (theNode->leftChild)
+				theQueue.push(theNode->leftChild);
+			if (theNode->rightChild)
+				theQueue.push(theNode->rightChild);
+
+			if (!theQueue.empty())
 			{
-				begin->bf = 1;
-				begin = begin->leftChild;
+				theNode = theQueue.front();
+				theQueue.pop();
 			}
 			else
-			{
-				begin->bf = -1;
-				begin = begin->rightChild;
-			}
-	}
-
-	template<typename K, typename E>
-	inline void avlTree<K, E>::LLrotate(node* PA, node* A, node* B)
-	{
-		A->leftChild = B->rightChild;
-		B->rightChild = A;
-
-		if (!PA)
-			root = B;
-		else
-		{
-			if (A == PA->rightChild)
-				PA->leftChild = B;
-			else
-				PA->rightChild = B;
+				theNode = nullptr;
 		}
-
-		A->bf = B->bf = 0;
-	}
-
-	template<typename K, typename E>
-	inline void avlTree<K, E>::RRrotate(node* PA, node* A, node* B)
-	{
-		B->leftChild = A;
-		A->rightChild = B->leftChild;
-		if (!PA)
-			root = B;
-		else
-		{
-			if (A = PA->leftChild)
-				PA->leftChild = B;
-			else
-				PA->rightChild = B;
-		}
-
-		A->bf = B->bf = 0;
-	}
-
-	template<typename K, typename E>
-	inline void avlTree<K, E>::LRrotate(node* PA, node* A, node* B)
-	{
-
-
-
 	}
 
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
