@@ -42,13 +42,10 @@
 //
 //	delete demo;
 //}
-//
-//
-//
+
 
 #include <iostream>
 #include "avlTree.h"
-
 
 
 int main()
@@ -60,7 +57,6 @@ int main()
 
 	for (size_t i = 1; i <= 15; i++)
 		demo->insert(make_pair(i, 0));
-	
 
 	demo->ascend();
 
@@ -68,6 +64,7 @@ int main()
 
 	demo->levelOrder();
 	delete demo;
+
 }
 
 

@@ -1,6 +1,8 @@
 #pragma once
 #include <iostream>
+#include <stdexcept>
 #include <queue>
+#include <stack>
 #include "binaryTreeNode.h"
 #include "binarySearchTree.h"
 
@@ -19,6 +21,9 @@ namespace avlTree
 
 		//insert
 		void insert(const std::pair<const K, E>& thePair);
+
+		//erase
+		void erase(const K& theKey);
 
 		//asc output
 		void ascend();
@@ -298,6 +303,135 @@ namespace avlTree
 		//A不存在，更新路径[root,newNode)上所有节点的平衡因子
 		else
 			updateBF(root, newNode, thePair.first);
+	}
+
+	template<typename K, typename E>
+	inline void avlTree<K, E>::erase(const K& theKey)
+	{
+		//hold path taken from root to physically deleted node
+		std::stack<node*> pathStack;
+		node
+			* deleteNode = root;
+
+		//找到需要删除的节点
+		while (deleteNode && deleteNode->element.first != theKey)
+		{
+			pathStack.push(deleteNode);
+			if (theKey < deleteNode->element.first)
+				deleteNode = deleteNode->leftChild;
+			else
+				deleteNode = deleteNode->rightChild;
+		}
+		if (!deleteNode)
+			throw std::logic_error("The node to be deleted was not found");
+		
+		//如果要删除的节点有左右两个子节点
+		if (deleteNode->leftChild && deleteNode->rightChild)
+		{
+			pathStack.push(deleteNode);
+			node
+				* leftMaxNode = deleteNode->leftChild;
+			while (leftMaxNode->rightChild)
+			{
+				pathStack.push(leftMaxNode);
+				leftMaxNode = leftMaxNode->rightChild;
+			}
+			deleteNode->element = leftMaxNode->element;
+			deleteNode = leftMaxNode;
+		}
+
+		//将删除节点的下级节点和删除节点的上级节点建立连接
+		node
+			* deleteNodeChild;
+		if (deleteNode->leftChild)
+			deleteNodeChild = deleteNode->leftChild;
+		else
+			deleteNodeChild = deleteNode->rightChild;
+
+		if (deleteNode == root)
+			root = deleteNodeChild;
+		else
+		{
+			if (deleteNode == pathStack.top()->leftChild)
+				pathStack.top()->leftChild = deleteNodeChild;
+			else
+				pathStack.top()->rightChild = deleteNodeChild;
+		}
+		std::pair<const K,E> deleteNodeElement = deleteNode->element;
+		delete deleteNode;
+
+		if (pathStack.empty())
+			return;
+		node
+			* q = pathStack.top();
+		pathStack.pop();
+		
+		while (q)
+		{
+			if (deleteNodeElement.first <= q->element.first)
+			{
+				//删除发生在q的左边
+				q->bf--;
+				
+				//删除之前q->bf == 0，以q为根的子树高度不变，只需要改变q->bf
+				if (q->bf == -1)
+					return;
+				//删除之前q->bf == -1，此时树是不平衡的
+				else if (q->bf == -2)
+				{
+
+				}
+				else //删除之后q->bf == 0，删除之前q->bf == 1，以q为根的子树高度降低一个单位，需要改变父节点的平衡因子，有可以需要改变祖先节点的
+				{
+
+				}
+
+			}
+			else
+			{
+				//删除发生在q的右边
+				q->bf++;
+
+				if (q->bf == 1)
+					return;
+
+				else if (q->bf == 2)
+				{
+					node
+						* B = q->leftChild,
+						* PA;
+
+					if (pathStack.empty())
+						PA = 0;
+					else
+					{
+						PA = pathStack.top();
+						pathStack.pop();
+					}
+
+					switch (B->bf)
+					{
+					case 0:	//=====>RO型
+						LLrotate(PA, q, B);
+						B->bf = -1;
+						q->bf = 1;
+						return;
+					case 1:	//=====>R1型
+						LLrotate(PA, q, B);
+						break;
+					case -1:
+						LRrotate(PA,)
+					}
+
+				}
+				else //q->bf == 0
+				{
+
+				}
+
+			}
+		}
+
 	}
 
 	template<typename K, typename E>
